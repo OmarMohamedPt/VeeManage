@@ -7,8 +7,10 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using VMTS.API.Helpers;
 using VMTS.Core.Entities.Identity;
+using VMTS.Core.Interfaces.Repositories;
 using VMTS.Core.ServicesContract;
 using VMTS.Repository.Identity;
+using VMTS.Repository.Identity.Repository;
 using VMTS.Service.Services;
 
 namespace VMTS.API.Extensions;
@@ -27,6 +29,9 @@ public static class AppUserIdentityServices
             .AddDefaultTokenProviders();;
 
         services.AddScoped(typeof(IAuthService), typeof(AuthService));
+        
+        services.AddScoped(typeof(IIdentityGenericRepository<>), typeof(IdentityGenericRepository<>));
+
         
         services.AddAutoMapper(typeof(MappingProfile));
 

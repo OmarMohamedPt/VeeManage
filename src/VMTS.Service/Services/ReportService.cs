@@ -5,6 +5,7 @@ using VMTS.Core.Entities.Report;
 using VMTS.Core.Entities.Trip;
 using VMTS.Core.Interfaces.UnitOfWork;
 using VMTS.Core.ServicesContract;
+using VMTS.Core.Specifications.FaultReportSepcification;
 using VMTS.Core.Specifications.TripRequestSpecification;
 
 namespace VMTS.Service.Services;
@@ -23,7 +24,7 @@ public class ReportService : IReportService
     }
 
     public async Task<FaultReport> CreateFaultReportAsync(string userEmail, string details, 
-        MaintenanceType faultType, FaultComponent? faultComponent ,string address)
+        MaintenanceType faultType,string address)
     {
         // get driver
         var driver = await _userManager.FindByEmailAsync(userEmail);
@@ -47,7 +48,6 @@ public class ReportService : IReportService
             Details = details,
             ReportedAt = DateTime.UtcNow,
             FaultType = faultType,
-            FaultComponent = faultComponent,
             TripId = tripRequest.Id,
             VehicleId = tripRequest.Vehicle.Id, 
             DriverId = tripRequest.DriverId, 
@@ -61,5 +61,37 @@ public class ReportService : IReportService
         return result > 0 ? faultReport : null;
     }
 
+    public Task<IReadOnlyList<FaultReport>> GetAllFaultReportsAsync(FaultReportSpecParams specParams)
+    {
+        var specs = new FaultReportIncludesSpecification(specParams);
+        var faults = _unitOfWork.GetRepo<FaultReport>().GetAllWithSpecification(specs);
+        return faults;
+    }
 
+    public Task<IReadOnlyList<FaultReport>> GetFaultReportsForUserAsync(FaultReportSpecParams specParams, string driverId)
+    {
+        var specParam = new FaultReportSpecParams()
+        {
+           PageSize = specParams.PageSize,
+           PageIndex = specParams.PageIndex,
+           ReportDate = specParams.ReportDate,
+           FaultType = specParams.FaultType,
+           Search = specParams.Search,
+           Sort = specParams.Sort,
+           TripId = specParams.TripId,
+           VehicleId = specParams.VehicleId,
+           DriverId = driverId
+        };
+
+        var specs = new FaultReportIncludesSpecification(specParam); 
+        var faults = _unitOfWork.GetRepo<FaultReport>().GetAllWithSpecification(specs);
+        return faults;
+    }
+
+    public Task<FaultReport> GetByIdAsync(string id)
+    {
+        var specs = new FaultReportIncludesSpecification(id);
+        var faultReport = _unitOfWork.GetRepo<FaultReport>().GetByIdWithSpecification(specs);
+        return faultReport;
+    }
 }

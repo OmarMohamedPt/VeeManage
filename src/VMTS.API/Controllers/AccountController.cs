@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,7 +14,7 @@ using VMTS.Core.Interfaces.UnitOfWork;
 using VMTS.Core.ServicesContract;
 
 namespace VMTS.API.Controllers;
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+
 public class AccountController : BaseApiController
 {
     private readonly UserManager<AppUser> _userManager;
@@ -23,6 +24,7 @@ public class AccountController : BaseApiController
     private readonly IUnitOfWork _iunitOfWork;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
+    private readonly IRecentActivityService _activityService;
 
     public AccountController(
         UserManager<AppUser> userManager,
@@ -31,7 +33,8 @@ public class AccountController : BaseApiController
         RoleManager<IdentityRole> roleManager,
         IUnitOfWork iunitOfWork,
         IMapper mapper,
-        IUserService userService
+        IUserService userService,
+        IRecentActivityService activityService
     )
     {
         _userManager = userManager;
@@ -41,20 +44,20 @@ public class AccountController : BaseApiController
         _iunitOfWork = iunitOfWork;
         _mapper = mapper;
         _userService = userService;
+        _activityService = activityService;
     }
 
     #region register
-
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     [HttpPost("register")]
     public async Task<ActionResult<RegisterResponse>> Register(RegisterRequest model)
     {
         var email = await _authService.GenerateUniqueEmailAsync(model.FirstName, model.LastName);
-
         var password = "Pa$$w0rd";
 
         var address = _mapper.Map<Address>(model.Address);
 
-        var user = new AppUser()
+        var user = new AppUser
         {
             Email = email,
             UserName = email.Split('@')[0],
@@ -66,15 +69,15 @@ public class AccountController : BaseApiController
         if (!result.Succeeded)
             return BadRequest(new ApiResponse(400));
 
-        var role = await _roleManager.RoleExistsAsync(model.Role);
-        if (!role)
+        var roleExists = await _roleManager.RoleExistsAsync(model.Role);
+        if (!roleExists)
             return NotFound(new ApiResponse(404));
 
         var userRole = await _userManager.AddToRoleAsync(user, model.Role);
         if (!userRole.Succeeded)
             return BadRequest(new ApiResponse(400));
 
-        var businessUser = new BusinessUser()
+        var businessUser = new BusinessUser
         {
             Id = user.Id,
             DisplayName = $"{model.FirstName?.Trim()} {model.LastName?.Trim()}",
@@ -86,8 +89,19 @@ public class AccountController : BaseApiController
         await _iunitOfWork.GetRepo<BusinessUser>().CreateAsync(businessUser);
         await _iunitOfWork.SaveChanges();
 
-        return Ok(new RegisterResponse() { Email = email });
+       
+        var adminEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        var adminRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+
+        
+        var displayName = businessUser.DisplayName;
+        var description = $"Registered new account: {displayName}";
+        await _activityService.LogActivity(description, adminEmail, adminRole);
+
+        return Ok(new RegisterResponse { Email = email });
     }
+
 
     #endregion
     
@@ -105,7 +119,7 @@ public class AccountController : BaseApiController
         if (user.MustChangePassword)
         {
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            return Unauthorized(new ApiResponse(401, "Password reset required"));
+            return Unauthorized(new ChangePasswordDto(){MustChangePassword = true , Message = "reset password required"});
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
@@ -118,6 +132,8 @@ public class AccountController : BaseApiController
         return Ok(
             new UserDto()
             {
+                MustChangePassword = user.MustChangePassword,
+                
                 Email = user.Email,
                 // DisplayName = user.DisplayName,
                 Token = tokenString,
@@ -153,7 +169,7 @@ public class AccountController : BaseApiController
         return Ok(
             new ResetPasswordResponse
             {
-                Message = "Password reset successful. Please log in again.",
+                Message = "Password reset successfully. Please log in again.",
             }
         );
     }
@@ -176,10 +192,11 @@ public class AccountController : BaseApiController
     
     #region delete user
 
-    [HttpDelete]
-    public async Task<ActionResult> DeleteUser([FromBody] UserDeleteRequest request)
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [HttpDelete("delete/{userId}")]
+    public async Task<ActionResult> DeleteUser(string userId)
     {
-        var user = await _userManager.FindByIdAsync(request.UserId);
+        var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
             return NotFound(new ApiResponse(404, "User not found"));
 
@@ -194,32 +211,41 @@ public class AccountController : BaseApiController
     #endregion
     
     #region edit user
-    [HttpPut("edit")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPut("edit/{userId}")]
     public async Task<ActionResult> Edit(EditUserRequest request, string userId)
     {
         var result = await _userService.EditUserAsync(
             userId,
             request.UserName,
             request.PhoneNumber,
-            request.Address.Street,
-            request.Address.Area,
-            request.Address.Governorate,
-            request.Address.Country,
+            request.Address?.Street,
+            request.Address?.Area,
+            request.Address?.Governorate,
+            request.Address?.Country,
             request.Role
         );
 
-        if (!result) return BadRequest(new ApiResponse(400, "Failed to update user"));
+        if (!result)
+            return BadRequest(new ApiResponse(400, "Failed to update user"));
+
+        // Optional: log who edited the user
+        var adminEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        var adminRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+        var description = $"Updated user with ID: {userId}";
+
+        await _activityService.LogActivity(description, adminEmail, adminRole);
 
         return Ok(new ApiResponse(200, "User updated successfully"));
     }
 
-
     #endregion
+    
 
     #region Get User By Id
-
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     [HttpGet("getById")]
-    public async Task<ActionResult<UserResponse>> GetById(string userId)
+    public async Task<ActionResult<UserByIdResponse>> GetById(string userId)
     {
         var result = await _userManager.Users
             .Include(u => u.Address)
@@ -231,7 +257,7 @@ public class AccountController : BaseApiController
         var roles = await _userManager.GetRolesAsync(result);
         var role = roles.FirstOrDefault();
 
-        return Ok(new UserResponse()
+        return Ok(new UserByIdResponse()
         {
             Email = result.Email,
             UserName = result.UserName,
@@ -252,7 +278,7 @@ public class AccountController : BaseApiController
     #endregion
 
     #region Get All Users
-
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     [HttpGet("getall")]
     public async Task<ActionResult<IReadOnlyList<UserResponse>>> GetAllUsers()
     {

@@ -50,6 +50,8 @@ public class VTMSDbContext : DbContext
     public DbSet<BusinessUser> BusinessUsers { get; set; }
 
     #endregion
+    
+
 
     public VTMSDbContext(DbContextOptions<VTMSDbContext> options)
         : base(options) { }

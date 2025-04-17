@@ -12,10 +12,6 @@ public class TripReport : BaseEntity
     public DateTime Date { get; set; }
 
     public decimal FuelCost { get; set; }
-
-    // public bool IsFault {get; set; } = false;
-    //
-    // public FaultTypes FaultType { get; set; }
     
     public BusinessUser Driver { get; set; }
     

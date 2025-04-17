@@ -11,6 +11,7 @@ public class UserService : IUserService
     private readonly UserManager<AppUser> _userManager;
     private readonly IMapper _mapper;
 
+    // ✅ Constructor injection for _userManager and _mapper
     public UserService(UserManager<AppUser> userManager, IMapper mapper)
     {
         _userManager = userManager;
@@ -21,10 +22,10 @@ public class UserService : IUserService
         string userId,
         string? userName,
         string? phoneNumber,
-        string street,
-        string area,
-        string governorate,
-        string country,
+        string? street,
+        string? area,
+        string? governorate,
+        string? country,
         string? role)
     {
         var user = await _userManager.Users
@@ -34,30 +35,44 @@ public class UserService : IUserService
         if (user == null)
             return false;
 
+        // Update basic fields
         if (!string.IsNullOrWhiteSpace(userName))
             user.UserName = userName;
 
         if (!string.IsNullOrWhiteSpace(phoneNumber))
             user.PhoneNumber = phoneNumber;
 
-        // Address update
-        if (user.Address == null)
+        // Update or create address if any address field is sent
+        if (!string.IsNullOrWhiteSpace(street) ||
+            !string.IsNullOrWhiteSpace(area) ||
+            !string.IsNullOrWhiteSpace(governorate) ||
+            !string.IsNullOrWhiteSpace(country))
         {
-            user.Address = new Address
+            if (user.Address == null)
             {
-                Street = street,
-                Area = area,
-                Governorate = governorate,
-                Country = country,
-                AppUserId = user.Id
-            };
-        }
-        else
-        {
-            user.Address.Street = street;
-            user.Address.Area = area;
-            user.Address.Governorate = governorate;
-            user.Address.Country = country;
+                user.Address = new Address
+                {
+                    Street = street,
+                    Area = area,
+                    Governorate = governorate,
+                    Country = country,
+                    AppUserId = user.Id
+                };
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(street))
+                    user.Address.Street = street;
+
+                if (!string.IsNullOrWhiteSpace(area))
+                    user.Address.Area = area;
+
+                if (!string.IsNullOrWhiteSpace(governorate))
+                    user.Address.Governorate = governorate;
+
+                if (!string.IsNullOrWhiteSpace(country))
+                    user.Address.Country = country;
+            }
         }
 
         // Role update

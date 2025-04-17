@@ -17,5 +17,12 @@ public class MappingProfile : Profile
 
         CreateMap<MaintenanceRequestDto, MaintenaceRequest>();
         CreateMap<MaintenaceRequest, MaintenanceRequestResponse>();
+        
+        CreateMap<AddressDto, Address>()
+            .ForMember(dest => dest.AppUserId, opt => opt.Ignore()) // Explicitly ignore this
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null)); // Apply null-check to all others
+
+        CreateMap<AppUser, UserResponse>();
+
     }
 }

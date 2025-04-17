@@ -23,24 +23,17 @@ public class TripRequestService : ITripRequestService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<TripRequest> CreateTripRequestAsync(string managerEmail,
-                                                          string driverEmail,
+    public async Task<TripRequest> CreateTripRequestAsync(string managerId,
+                                                          string driverId,
                                                           string vehicleId,
                                                           TripType tripType,
                                                           string details,
                                                           string destination
                                                           )
     {
-        // Get manager
-        var manager = await _userManager.FindByEmailAsync(managerEmail);
-        if (manager is null) throw new UnauthorizedAccessException("Unauthorized: unable to find manager");
-        var managerId = manager.Id;
+        
 
-        // Get driver
-        var driver = await _userManager.FindByEmailAsync(driverEmail);
-        if (driver is null) throw new UnauthorizedAccessException("Unauthorized: unable to find driver");
-        var driverId = driver.Id;
-
+        
         // Get vehicle
         var vehicleSpec = new VehicleIncludesSpecification(vehicleId);
         var vehicle = await _unitOfWork.GetRepo<Vehicle>().GetByIdWithSpecification(vehicleSpec);

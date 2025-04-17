@@ -10,39 +10,56 @@ namespace VMTS.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Logging setup
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
 
-            builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+            // Add services to the container
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); // Convert enums to strings
+                });
+
             builder.Services.AddOpenApi();
 
             VTMSServices.AddAppServices(builder.Services, builder.Configuration);
-
             AppUserIdentityServices.AddAppServices(builder.Services, builder.Configuration);
-                
-            
-            builder.Services
-                .AddControllers()
-                .AddJsonOptions(options =>
+
+            // CORS setup for development & production
+            builder.Services.AddCors(options =>
             {
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); // Convert enums to strings
-            });;
-            
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins(
+                            "http://localhost:3000",            // Dev frontend
+                            "https://veemanage.runasp.net"      // Deployment frontend
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-                app.MapScalarApiReference();
-            }
+            // CORS middleware
+            app.UseCors("AllowFrontend");
 
+            // Swagger always enabled
+            app.MapOpenApi();
+            app.MapScalarApiReference();
+
+            // Optional: comment this if HTTPS causes issues on runasp.net
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
+
+            // Add default root path to avoid 404 at /
+            app.MapGet("/", () => "API is running...");
 
             app.Run();
         }
