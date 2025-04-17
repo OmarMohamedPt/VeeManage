@@ -9,7 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1164d381-8dc8-4344-b4ef-7d63920c92c3" name="Changes" comment="" />
+    <list default="true" id="1164d381-8dc8-4344-b4ef-7d63920c92c3" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/VMTS.API/Controllers/RecentActivityController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/VMTS.API/Controllers/RecentActivityController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/VMTS.API/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/VMTS.API/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/VMTS.API/VMTS.API.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/VMTS.API/VMTS.API.csproj" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -50,7 +54,7 @@
 }</component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
-    "url": "git@github.com:OmarMohamedPt/VeeManage.git",
+    "url": "https://github.com/OmarMohamedPt/VeeManage.git",
     "accountId": "c1d4d7eb-4f43-4a76-b6e6-fa2af135d2e4"
   },
   "recentNewPullRequestHead": {
@@ -105,6 +109,7 @@
     ".NET Launch Settings Profile.VMTS.API: https.executor": "Run",
     "Docker.VMTS.API/Dockerfile.executor": "Run",
     "HTTP Request.VMTS.API | #1.executor": "Run",
+    "Publish to custom server.Publish.executor": "Run",
     "Publish to custom server.VeeManage.executor": "Run",
     "Publish to custom server.veemanage.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -120,7 +125,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Publish to custom server.VeeManage">
+  <component name="RunManager" selected="Publish to custom server.Publish">
     <configuration default="true" type="docker-deploy" factoryName="dockerfile" temporary="true">
       <deployment type="dockerfile">
         <settings />
@@ -128,12 +133,12 @@
       <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="true" isSslEnabled="false" />
       <method v="2" />
     </configuration>
-    <configuration name="VeeManage" type="DotNetPublishAndUpload" factoryName="Publish to custom server">
-      <riderPublish configuration="Release" platform="Any CPU" runtime="Portable" server_id="a22d34ca-7185-4102-b73a-e29080d140e6" serverName="VeeManagePublish" target_framework="net9.0" uuid_high="232978124905334219" uuid_low="-8360496686740578137" />
+    <configuration name="Unnamed" type="DotNetFolderPublish" factoryName="Publish to folder">
+      <riderPublish configuration="Release" platform="Any CPU" runtime="Portable" target_folder="$PROJECT_DIR$/src/VMTS.API/bin/Release/net9.0/publish" target_framework="net9.0" uuid_high="232978124905334219" uuid_low="-8360496686740578137" />
       <method v="2" />
     </configuration>
-    <configuration name="veemanage" type="DotNetPublishAndUpload" factoryName="Publish to custom server">
-      <riderPublish configuration="Release" platform="Any CPU" runtime="Portable" server_id="96f5b5be-eeee-41f8-a65a-5517ce24cdb0" serverName="VeeManagePublish" target_framework="net9.0" uuid_high="232978124905334219" uuid_low="-8360496686740578137" />
+    <configuration name="Publish" type="DotNetPublishAndUpload" factoryName="Publish to custom server">
+      <riderPublish configuration="Release" platform="Any CPU" runtime="Portable" server_id="cee678b8-0bcf-4ff7-96de-da332d15f8f1" serverName="veemanage" target_framework="net9.0" uuid_high="232978124905334219" uuid_low="-8360496686740578137" />
       <method v="2" />
     </configuration>
     <configuration name="VMTS.API: http" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
@@ -231,7 +236,8 @@
       <item itemvalue=".NET Launch Settings Profile.VMTS.API: http" />
       <item itemvalue=".NET Launch Settings Profile.VMTS.API: https" />
       <item itemvalue="Docker.VMTS.API/Dockerfile" />
-      <item itemvalue="Publish to custom server.VeeManage" />
+      <item itemvalue="Publish to custom server.Publish" />
+      <item itemvalue="Publish to folder.Unnamed" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -298,6 +304,7 @@
       <workItem from="1744715974637" duration="9880000" />
       <workItem from="1744752674670" duration="11648000" />
       <workItem from="1744820632260" duration="13414000" />
+      <workItem from="1744853939316" duration="5397000" />
     </task>
     <task id="LOCAL؜-٠٠٠٠٨" summary="change ValidIssuer">
       <option name="closed" value="true" />

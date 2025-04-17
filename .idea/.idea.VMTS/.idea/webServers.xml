@@ -2,12 +2,8 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="a22d34ca-7185-4102-b73a-e29080d140e6" name="VeeManagePublish" url="http://site22959.siteasp.net">
-        <fileTransfer rootFolder="/wwwroot" host="site22959.siteasp.net" port="21">
-          <advancedOptions>
-            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
-          </advancedOptions>
-        </fileTransfer>
+      <webServer id="cee678b8-0bcf-4ff7-96de-da332d15f8f1" name="veemanage" url="&#9;https://webftp.monsterasp.net ">
+        <fileTransfer host="site22970.siteasp.net" port="21" />
       </webServer>
     </option>
   </component>

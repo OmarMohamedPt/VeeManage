@@ -32,4 +32,16 @@
     <ProjectReference Include="..\VMTS.Service\VMTS.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="appsettings.Development.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Dockerfile\" />
+  </ItemGroup>
+
+
 </Project>

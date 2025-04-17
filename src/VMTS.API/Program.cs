@@ -26,6 +26,13 @@ namespace VMTS.API
             VTMSServices.AddAppServices(builder.Services, builder.Configuration);
             AppUserIdentityServices.AddAppServices(builder.Services, builder.Configuration);
 
+            
+            var env = builder.Environment;
+            builder.Configuration
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+
+            
             // CORS setup for development & production
             builder.Services.AddCors(options =>
             {

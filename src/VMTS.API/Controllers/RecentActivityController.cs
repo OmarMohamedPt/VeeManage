@@ -15,7 +15,7 @@ public class RecentActivityController : BaseApiController
         _activityService = activityService;
     }
     
-    
+        
     #region get all activity logs
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     [HttpPost]
